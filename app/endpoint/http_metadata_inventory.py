@@ -1,5 +1,9 @@
+import requests
+
 from fastapi import APIRouter
-# from fastapi.responses import JSONResponse
+from pymongo.errors import DuplicateKeyError
+from pydantic import ValidationError
+
 from app.service.http_metadata_inventory_service import HTTPMetadataInventoryService
 from app.model.http_metadata_inventory_model import (
     ScrapeMetadataRequest,
@@ -8,6 +12,7 @@ from app.model.http_metadata_inventory_model import (
     FetchMetadataResponse
 )
 from app.utility.api_utility.api_response_utility import JSONResponse
+from app.utility.error_handling.exceptions import DuplicateURLError, InvalidURLError, URLFetchError
 
 router = APIRouter(
     prefix="/metadata_inventory",
@@ -26,21 +31,27 @@ def startup():
 async def scrape_metadata(request: ScrapeMetadataRequest):
     service = HTTPMetadataInventoryService()
 
-    service_response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
+    try:
+        service_response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
+    except requests.exceptions.RequestException as e:
+        raise URLFetchError(url=str(request.url), reason=str(e))
+    except DuplicateKeyError:
+        raise DuplicateURLError(url=str(request.url))
 
-    response = JSONResponse(
+    return JSONResponse(
         data=service_response,
         message=None,
     )
-
-    return response
 
 
 @router.get("/fetch")
 async def fetch_metadata(url: str):
     service = HTTPMetadataInventoryService()
 
-    request = FetchMetadataRequest(url=url)
+    try:
+        request = FetchMetadataRequest(url=url)
+    except ValidationError:
+        raise InvalidURLError(url=url)
 
     service_response: FetchMetadataResponse = await service.fetch_metadata(request=request)
 
@@ -49,12 +60,10 @@ async def fetch_metadata(url: str):
             data=service_response,
             message=None
         )
-    
-    response = JSONResponse(
-            data=None,
-            message="Url metadata request logged",
-            status_code=202
-        )
 
-    return response
+    return JSONResponse(
+        data=None,
+        message="Url metadata request logged",
+        status_code=202
+    )
 
