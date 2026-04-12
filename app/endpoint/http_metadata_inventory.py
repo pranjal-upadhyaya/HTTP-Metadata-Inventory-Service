@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from app.service.http_metadata_inventory_service import HTTPMetadataInventoryService
 from app.model.http_metadata_inventory_model import (
     ScrapeMetadataRequest,
@@ -24,7 +25,11 @@ def startup():
 async def scrape_metadata(request: ScrapeMetadataRequest):
     service = HTTPMetadataInventoryService()
 
-    response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
+    service_response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
+
+    response = JSONResponse(
+        content=service_response.model_dump()
+    )
 
     return response
 
@@ -35,7 +40,11 @@ async def fetch_metadata(url: str):
 
     request = FetchMetadataRequest(url=url)
 
-    response: FetchMetadataResponse = await service.fetch_metadata(request=request)
+    service_response: FetchMetadataResponse = await service.fetch_metadata(request=request)
+
+    response = JSONResponse(
+        content=service_response.model_dump()
+    )
 
     return response
 

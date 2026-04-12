@@ -1,5 +1,7 @@
+import asyncio
 import requests
 from app.model.http_metadata_inventory_model import (
+    MetadataInventoryMixin,
     FetchMetadataRequest,
     FetchMetadataResponse,
     ScrapeMetadataRequest,
@@ -41,14 +43,23 @@ class HTTPMetadataInventoryService:
 
         if repository_response:
             logger.info("Existing metadata found for url: {}", request.url)
-            return FetchMetadataResponse.model_validate(
-                repository_response.model_dump()
+            return FetchMetadataResponse(
+                metadata_available=True,
+                metadata=  MetadataInventoryMixin.model_validate(
+                    repository_response.model_dump()
+                )
             )
 
         logger.info("Existing metadata not found for url: {}", request.url)
+
         scrape_request = ScrapeMetadataRequest(url=request.url)
-        scrape_response: ScrapeMetadataResponse = await self.scrape_metadata(
-            scrape_request
+
+        asyncio.create_task(
+            self.scrape_metadata(scrape_request)
         )
-        return FetchMetadataResponse.model_validate(scrape_response.model_dump())
+
+        return FetchMetadataResponse(
+            metadata=None,
+            metadata_available=False
+        )
 
