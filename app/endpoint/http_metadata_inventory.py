@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+# from fastapi.responses import JSONResponse
 from app.service.http_metadata_inventory_service import HTTPMetadataInventoryService
 from app.model.http_metadata_inventory_model import (
     ScrapeMetadataRequest,
@@ -7,6 +7,7 @@ from app.model.http_metadata_inventory_model import (
     FetchMetadataRequest,
     FetchMetadataResponse
 )
+from app.utility.api_utility.api_response_utility import JSONResponse
 
 router = APIRouter(
     prefix="/metadata_inventory",
@@ -28,7 +29,8 @@ async def scrape_metadata(request: ScrapeMetadataRequest):
     service_response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
 
     response = JSONResponse(
-        content=service_response.model_dump()
+        data=service_response,
+        message=None,
     )
 
     return response
@@ -44,11 +46,13 @@ async def fetch_metadata(url: str):
 
     if service_response.metadata_available:
         return JSONResponse(
-            content=service_response.model_dump()
+            data=service_response,
+            message=None
         )
     
     response = JSONResponse(
-            content=None,
+            data=None,
+            message="Url metadata request logged",
             status_code=202
         )
 
