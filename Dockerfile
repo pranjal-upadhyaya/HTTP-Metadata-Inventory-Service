@@ -9,7 +9,7 @@ WORKDIR /http_metadata_inventory_service
 COPY pyproject.toml poetry.lock ./
 
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-root --no-interaction
+    && poetry install --no-root --no-interaction --without dev
 
 COPY . .
 
