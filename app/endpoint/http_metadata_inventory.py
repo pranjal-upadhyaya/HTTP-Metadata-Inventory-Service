@@ -1,9 +1,10 @@
 import requests
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pymongo.errors import DuplicateKeyError
 from pydantic import ValidationError
 
+from app.module.http_metadata_inventory_module import get_service
 from app.service.http_metadata_inventory_service import HTTPMetadataInventoryService
 from app.model.http_metadata_inventory_model import (
     ScrapeMetadataRequest,
@@ -21,8 +22,10 @@ router = APIRouter(
 
 
 @router.post("/scrape", response_model=Response[ScrapeMetadataResponse])
-async def scrape_metadata(request: ScrapeMetadataRequest) -> JSONResponse:
-    service = HTTPMetadataInventoryService()
+async def scrape_metadata(
+    request: ScrapeMetadataRequest,
+    service: HTTPMetadataInventoryService = Depends(get_service)
+) -> JSONResponse:
 
     try:
         service_response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
@@ -38,8 +41,10 @@ async def scrape_metadata(request: ScrapeMetadataRequest) -> JSONResponse:
 
 
 @router.get("/fetch", response_model=Response[FetchMetadataResponse])
-async def fetch_metadata(url: str) -> JSONResponse:
-    service = HTTPMetadataInventoryService()
+async def fetch_metadata(
+    url: str,
+    service: HTTPMetadataInventoryService = Depends(get_service)
+) -> JSONResponse:
 
     try:
         request = FetchMetadataRequest(url=url)
