@@ -18,7 +18,7 @@ class HTTPMetadataInventoryService:
         self.repository = HTTPMetadataInventoryRepository()
 
 
-    async def scrape_metadata(self, request: ScrapeMetadataRequest):
+    async def scrape_metadata(self, request: ScrapeMetadataRequest) -> ScrapeMetadataResponse:
         response = requests.get(url=request.url)
 
         page_source = response.text
@@ -39,7 +39,7 @@ class HTTPMetadataInventoryService:
 
         return response
 
-    async def fetch_metadata(self, request: FetchMetadataRequest):
+    async def fetch_metadata(self, request: FetchMetadataRequest) -> FetchMetadataResponse:
         repository_response = await self.repository.get_metadata_by_url(
             url=request.url
         )

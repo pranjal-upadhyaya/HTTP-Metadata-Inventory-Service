@@ -11,7 +11,7 @@ from app.model.http_metadata_inventory_model import (
     FetchMetadataRequest,
     FetchMetadataResponse
 )
-from app.utility.api_utility.api_response_utility import JSONResponse
+from app.utility.api_utility.api_response_utility import JSONResponse, Response
 from app.utility.error_handling.exceptions import DuplicateURLError, InvalidURLError, URLFetchError
 
 router = APIRouter(
@@ -27,8 +27,8 @@ def startup():
         "message": "Successfull startup",
     }
 
-@router.post("/scrape")
-async def scrape_metadata(request: ScrapeMetadataRequest):
+@router.post("/scrape", response_model=Response[ScrapeMetadataResponse])
+async def scrape_metadata(request: ScrapeMetadataRequest) -> JSONResponse:
     service = HTTPMetadataInventoryService()
 
     try:
@@ -44,8 +44,8 @@ async def scrape_metadata(request: ScrapeMetadataRequest):
     )
 
 
-@router.get("/fetch")
-async def fetch_metadata(url: str):
+@router.get("/fetch", response_model=Response[FetchMetadataResponse])
+async def fetch_metadata(url: str) -> JSONResponse:
     service = HTTPMetadataInventoryService()
 
     try:
