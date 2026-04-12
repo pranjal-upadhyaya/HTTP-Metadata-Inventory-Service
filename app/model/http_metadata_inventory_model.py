@@ -1,6 +1,6 @@
 from ast import Pass
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl, field_validator
 
 class MetadataInventoryMixin(BaseModel):
     url: str
@@ -10,11 +10,23 @@ class MetadataInventoryMixin(BaseModel):
 class ScrapeMetadataRequest(BaseModel):
     url: str
 
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        HttpUrl(v)
+        return v
+
 class ScrapeMetadataResponse(MetadataInventoryMixin):
     pass
 
 class FetchMetadataRequest(BaseModel):
     url: str
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        HttpUrl(v)
+        return v
 
 class FetchMetadataResponse(BaseModel):
     metadata: Optional[MetadataInventoryMixin]

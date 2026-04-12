@@ -42,9 +42,15 @@ async def fetch_metadata(url: str):
 
     service_response: FetchMetadataResponse = await service.fetch_metadata(request=request)
 
+    if service_response.metadata_available:
+        return JSONResponse(
+            content=service_response.model_dump()
+        )
+    
     response = JSONResponse(
-        content=service_response.model_dump()
-    )
+            content=None,
+            status_code=202
+        )
 
     return response
 
