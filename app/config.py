@@ -21,6 +21,8 @@ class AppConfig(BaseSettings):
 
     metadata_inventory_collection: str
 
+    http_request_timeout_s: int = 10
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

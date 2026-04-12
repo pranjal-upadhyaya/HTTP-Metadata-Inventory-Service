@@ -9,6 +9,7 @@ from app.model.http_metadata_inventory_model import (
 )
 
 from app.repository.http_metadata_inventory_repository import HTTPMetadataInventoryRepository
+from app.config import app_config
 
 from loguru import logger
 
@@ -19,7 +20,7 @@ class HTTPMetadataInventoryService:
 
 
     async def scrape_metadata(self, request: ScrapeMetadataRequest) -> ScrapeMetadataResponse:
-        response = requests.get(url=request.url)
+        response = requests.get(url=request.url, timeout=app_config.http_request_timeout_s)
 
         page_source = response.text
 
@@ -57,9 +58,17 @@ class HTTPMetadataInventoryService:
 
         scrape_request = ScrapeMetadataRequest(url=request.url)
 
-        asyncio.create_task(
-            self.scrape_metadata(scrape_request)
-        )
+        async def _run_background_scrape() -> None:
+            try:
+                await self.scrape_metadata(scrape_request)
+            except requests.exceptions.Timeout:
+                logger.error("Background scrape timed out for url: {}", scrape_request.url)
+            except requests.exceptions.RequestException as e:
+                logger.error("Background scrape failed for url {}: {}", scrape_request.url, str(e))
+            except Exception as e:
+                logger.error("Unexpected error during background scrape for url {}: {}", scrape_request.url, str(e))
+
+        asyncio.create_task(_run_background_scrape())
 
         return FetchMetadataResponse(
             metadata=None,
