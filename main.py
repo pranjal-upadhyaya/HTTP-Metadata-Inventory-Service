@@ -1,3 +1,7 @@
+from app.logging_setup import configure_logging
+
+configure_logging()
+
 import uvicorn
 from app.endpoint.router import app
 

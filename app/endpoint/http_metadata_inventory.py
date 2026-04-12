@@ -7,7 +7,10 @@ from app.model.http_metadata_inventory_model import (
     FetchMetadataResponse
 )
 
-router = APIRouter(prefix="/metadata_inventory")
+router = APIRouter(
+    prefix="/metadata_inventory",
+    tags=["Metadata Inventory"]
+)
 
 
 @router.get("/")
@@ -31,11 +34,11 @@ def fetch_metadata(url: str):
 
     service = HTTPMetadataInventoryService()
 
-    request = ScrapeMetadataRequest(
+    request = FetchMetadataRequest(
         url=url
     )
 
-    response: ScrapeMetadataResponse = service.scrape_metadata(request = request)
+    response: FetchMetadataResponse = service.fetch_metadata(request=request)
 
     return response
 
