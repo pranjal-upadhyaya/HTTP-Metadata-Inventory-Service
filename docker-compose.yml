@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${EXTERNAL_APP_PORT}:${APP_PORT}"
+    volumes:
+      - .:/http_metadata_inventory_service
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:8.0
+    ports:
+      - "${EXTERNAL_DB_PORT}:${DB_PORT}"
+    volumes:
+      - mongodata:/data/db
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongodata:
+
+networks:
+  backend:
+    driver: bridge
