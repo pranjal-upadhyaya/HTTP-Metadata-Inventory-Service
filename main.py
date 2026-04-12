@@ -1,4 +1,5 @@
-from app.logging_setup import configure_logging
+from app.utility.logging_utility.logging_utility import configure_logging
+
 
 configure_logging()
 

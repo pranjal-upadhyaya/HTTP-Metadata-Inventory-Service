@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from app.config import app_config
 from app.endpoint.http_metadata_inventory import router as http_metadata_inventory_router
-from app.logging_setup import configure_logging
+from app.utility.logging_utility.logging_utility import configure_logging
 from db.connection_manager import ConnectionManager
 
 
