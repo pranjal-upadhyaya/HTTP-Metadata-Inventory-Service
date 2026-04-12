@@ -20,13 +20,6 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-def startup():
-    return {
-        "status": 200,
-        "message": "Successfull startup",
-    }
-
 @router.post("/scrape", response_model=Response[ScrapeMetadataResponse])
 async def scrape_metadata(request: ScrapeMetadataRequest) -> JSONResponse:
     service = HTTPMetadataInventoryService()
