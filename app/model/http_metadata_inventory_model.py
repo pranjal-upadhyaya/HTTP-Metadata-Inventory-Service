@@ -4,6 +4,7 @@ from pydantic import BaseModel, HttpUrl, field_validator
 
 class MetadataInventoryMixin(BaseModel):
     url: str
+    headers: dict
     page_source: str
     cookies: dict
 

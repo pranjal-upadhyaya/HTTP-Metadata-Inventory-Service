@@ -23,10 +23,13 @@ class HTTPMetadataInventoryService:
 
         page_source = response.text
 
+        headers = dict(response.headers)
+
         cookies = response.cookies.get_dict()
 
         response = ScrapeMetadataResponse(
             url=request.url,
+            headers=headers,
             page_source=page_source,
             cookies=cookies
         )
