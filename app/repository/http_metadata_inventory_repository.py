@@ -1,6 +1,8 @@
 from db.connection_manager import ConnectionManager
 from app.config import app_config
 
+from db.schema.http_metadata_inventory_schema import MetadataInventory
+
 
 class HTTPMetadataInventoryRepository:
 
@@ -8,26 +10,20 @@ class HTTPMetadataInventoryRepository:
         connection = ConnectionManager()
         self.db = app_config.db_name
         self.collection = app_config.metadata_inventory_collection
-        self.client = connection.get_client()
+        self.client = connection.get_async_client()
 
-    def insert_metadata(self, doc: dict):
-        db = self.client[self.db]
-        col = db[self.collection]
+    async def insert_metadata(self, doc: dict):
+
+        metadata_inventory = MetadataInventory.model_validate(doc)
+
+        await metadata_inventory.insert()
         
-        output = col.insert_one(
-            document=doc
+        return metadata_inventory.id
+
+    async def get_metadata_by_url(self, url: str):
+
+        metadata_inventory = await MetadataInventory.find_one(
+            MetadataInventory.url == url
         )
-        return output.inserted_id
 
-    def get_metadata_by_url(self, url: str):
-
-        db = self.client[self.db]
-        col = db[self.collection]
-
-        query = {
-            "url": url
-        }
-
-        output = col.find_one(query)
-
-        return output
+        return metadata_inventory

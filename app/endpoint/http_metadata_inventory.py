@@ -21,24 +21,21 @@ def startup():
     }
 
 @router.post("/scrape")
-def scrape_metadata(request: ScrapeMetadataRequest):
-    
+async def scrape_metadata(request: ScrapeMetadataRequest):
     service = HTTPMetadataInventoryService()
 
-    response: ScrapeMetadataResponse = service.scrape_metadata(request = request)
+    response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
 
     return response
 
-@router.get("/fetch")
-def fetch_metadata(url: str):
 
+@router.get("/fetch")
+async def fetch_metadata(url: str):
     service = HTTPMetadataInventoryService()
 
-    request = FetchMetadataRequest(
-        url=url
-    )
+    request = FetchMetadataRequest(url=url)
 
-    response: FetchMetadataResponse = service.fetch_metadata(request=request)
+    response: FetchMetadataResponse = await service.fetch_metadata(request=request)
 
     return response
 
