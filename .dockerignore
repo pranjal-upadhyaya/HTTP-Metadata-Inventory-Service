@@ -24,3 +24,7 @@ lib/
 Dockerfile
 docker-compose.yml
 .dockerignore
+
+.ruff_cache/
+.pre-commit-config.yaml
+ruff.toml

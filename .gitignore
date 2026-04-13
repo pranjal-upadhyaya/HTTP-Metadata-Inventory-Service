@@ -12,3 +12,8 @@ lib/
 .env
 
 .python-version
+
+
+.ruff_cache/
+.pre-commit-config.yaml
+ruff.toml

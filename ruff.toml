@@ -1,0 +1,26 @@
+target-version = "py312"        # matches your python version
+
+line-length = 88
+
+[lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes — unused imports, undefined names
+    "I",      # isort — import sorting
+    "B",      # flake8-bugbear — common bugs and design issues
+    "UP",     # pyupgrade — modernise python syntax
+    "N",      # pep8 naming conventions
+    "ASYNC",  # async best practices
+]
+
+ignore = [
+    "E501",   # line too long — handled by formatter
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["S101"]    # allow assert in tests
+
+[format]
+quote-style = "double"
+indent-style = "space"
