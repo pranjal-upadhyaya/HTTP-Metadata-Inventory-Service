@@ -1,7 +1,6 @@
 from typing import Optional
 
 from beanie import PydanticObjectId
-from db.connection_manager import ConnectionManager
 from app.config import app_config
 
 from db.schema.http_metadata_inventory_schema import MetadataInventory
@@ -10,10 +9,7 @@ from db.schema.http_metadata_inventory_schema import MetadataInventory
 class HTTPMetadataInventoryRepository:
 
     def __init__(self) -> None:
-        connection = ConnectionManager()
-        self.db = app_config.db_name
-        self.collection = app_config.metadata_inventory_collection
-        self.client = connection.get_async_client()
+        pass
 
     async def insert_metadata(self, doc: dict) -> PydanticObjectId:
 

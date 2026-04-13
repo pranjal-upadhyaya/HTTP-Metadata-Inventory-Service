@@ -1,6 +1,6 @@
 import os
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AppConfig(BaseSettings):
@@ -25,11 +25,14 @@ class AppConfig(BaseSettings):
 
     http_request_timeout_s: int = 10
 
-    class Config:
-        env_file = os.getenv("ENV_FILE", ".env")
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        extra = "allow"
+    env: str
+
+    model_config = SettingsConfigDict(
+        env_file = os.getenv("ENV_FILE", ".env"),
+        env_file_encoding = "utf-8",
+        case_sensitive = False,
+        extra = "ignore",
+    )
 
 
 app_config = AppConfig()

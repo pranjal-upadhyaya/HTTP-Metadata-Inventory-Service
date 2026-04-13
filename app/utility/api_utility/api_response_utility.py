@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 Type = TypeVar("Type")
 
 class Response(BaseModel, Generic[Type]):
-    data: Optional[Type] = {}
+    data: Optional[Type] = None
     message: Optional[str] = None
 
 class JSONResponse(FastAPIJSONResponse, Generic[Type]):

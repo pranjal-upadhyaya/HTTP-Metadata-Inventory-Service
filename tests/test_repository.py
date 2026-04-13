@@ -33,8 +33,7 @@ async def initialized_db(mongo_container):
 
 @pytest.fixture
 async def repository(initialized_db):
-    with patch("app.repository.http_metadata_inventory_repository.ConnectionManager"):
-        return HTTPMetadataInventoryRepository()
+    return HTTPMetadataInventoryRepository()
 
 
 class TestInsertMetadata:
