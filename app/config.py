@@ -28,10 +28,10 @@ class AppConfig(BaseSettings):
     env: str
 
     model_config = SettingsConfigDict(
-        env_file = os.getenv("ENV_FILE", ".env"),
-        env_file_encoding = "utf-8",
-        case_sensitive = False,
-        extra = "ignore",
+        env_file=os.getenv("ENV_FILE", ".env"),
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
     )
 
 

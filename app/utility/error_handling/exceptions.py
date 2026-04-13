@@ -8,22 +8,17 @@ class ServiceError(Exception):
 class URLFetchError(ServiceError):
     def __init__(self, url: str, reason: str):
         super().__init__(
-            message=f"Failed to fetch URL '{url}': {reason}",
-            status_code=502
+            message=f"Failed to fetch URL '{url}': {reason}", status_code=502
         )
 
 
 class InvalidURLError(ServiceError):
     def __init__(self, url: str):
-        super().__init__(
-            message=f"Invalid URL: '{url}'",
-            status_code=400
-        )
+        super().__init__(message=f"Invalid URL: '{url}'", status_code=400)
 
 
 class DuplicateURLError(ServiceError):
     def __init__(self, url: str):
         super().__init__(
-            message=f"Metadata for URL '{url}' already exists",
-            status_code=409
+            message=f"Metadata for URL '{url}' already exists", status_code=409
         )

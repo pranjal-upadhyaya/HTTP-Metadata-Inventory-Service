@@ -16,6 +16,8 @@ select = [
 
 ignore = [
     "E501",   # line too long — handled by formatter
+    "B008",   # Depends() in default args is idiomatic FastAPI
+    "UP046",  # Generic[T] subclass syntax — Pydantic v2 compatibility
 ]
 
 [lint.per-file-ignores]

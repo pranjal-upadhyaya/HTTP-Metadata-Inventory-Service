@@ -1,11 +1,12 @@
-from typing import Optional
 from pydantic import BaseModel, HttpUrl, field_validator
+
 
 class MetadataInventoryMixin(BaseModel):
     url: str
     headers: dict
     page_source: str
     cookies: dict
+
 
 class ScrapeMetadataRequest(BaseModel):
     url: str
@@ -16,8 +17,10 @@ class ScrapeMetadataRequest(BaseModel):
         HttpUrl(v)
         return v
 
+
 class ScrapeMetadataResponse(MetadataInventoryMixin):
     pass
+
 
 class FetchMetadataRequest(BaseModel):
     url: str
@@ -28,6 +31,7 @@ class FetchMetadataRequest(BaseModel):
         HttpUrl(v)
         return v
 
+
 class FetchMetadataResponse(BaseModel):
-    metadata: Optional[MetadataInventoryMixin]
+    metadata: MetadataInventoryMixin | None
     metadata_available: bool

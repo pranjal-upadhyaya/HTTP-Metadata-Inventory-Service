@@ -3,9 +3,10 @@ from beanie import PydanticObjectId, init_beanie
 from pymongo import AsyncMongoClient
 from pymongo.errors import DuplicateKeyError
 from testcontainers.mongodb import MongoDbContainer
-from unittest.mock import patch
 
-from app.repository.http_metadata_inventory_repository import HTTPMetadataInventoryRepository
+from app.repository.http_metadata_inventory_repository import (
+    HTTPMetadataInventoryRepository,
+)
 from db.schema.http_metadata_inventory_schema import MetadataInventory
 
 MOCK_DOC = {
@@ -37,7 +38,6 @@ async def repository(initialized_db):
 
 
 class TestInsertMetadata:
-
     async def test_insert_success_returns_id(self, repository):
         result = await repository.insert_metadata(MOCK_DOC)
         assert isinstance(result, PydanticObjectId)
@@ -57,7 +57,6 @@ class TestInsertMetadata:
 
 
 class TestGetMetadataByUrl:
-
     async def test_get_found_returns_document(self, repository):
         await repository.insert_metadata(MOCK_DOC)
         result = await repository.get_metadata_by_url(MOCK_DOC["url"])

@@ -23,7 +23,9 @@ MOCK_METADATA = {
 
 @pytest.fixture
 def service():
-    with patch("app.service.http_metadata_inventory_service.HTTPMetadataInventoryRepository"):
+    with patch(
+        "app.service.http_metadata_inventory_service.HTTPMetadataInventoryRepository"
+    ):
         yield HTTPMetadataInventoryService()
 
 
@@ -36,7 +38,6 @@ def _make_mock_http_response(text="<html></html>", headers=None, cookies=None):
 
 
 class TestScrapeMetadata:
-
     async def test_scrape_success(self, service):
         mock_response = _make_mock_http_response()
         service.repository.insert_metadata = AsyncMock(return_value="mock_id")
@@ -93,7 +94,9 @@ class TestScrapeMetadata:
 
     async def test_scrape_connection_error_propagates(self, service):
         mock_client = AsyncMock()
-        mock_client.get = AsyncMock(side_effect=httpx.ConnectError("connection refused"))
+        mock_client.get = AsyncMock(
+            side_effect=httpx.ConnectError("connection refused")
+        )
         mock_async_client = MagicMock()
         mock_async_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_async_client.__aexit__ = AsyncMock(return_value=None)
@@ -104,7 +107,6 @@ class TestScrapeMetadata:
 
 
 class TestFetchMetadata:
-
     async def test_fetch_found_returns_metadata(self, service):
         mock_doc = MagicMock()
         mock_doc.model_dump.return_value = MOCK_METADATA

@@ -1,27 +1,25 @@
-from typing import Generic, TypeVar, Optional
-from pydantic import BaseModel
+from typing import Generic, TypeVar
 
-from fastapi.responses import JSONResponse as FastAPIJSONResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse as FastAPIJSONResponse
+from pydantic import BaseModel
 
 Type = TypeVar("Type")
 
+
 class Response(BaseModel, Generic[Type]):
-    data: Optional[Type] = None
-    message: Optional[str] = None
+    data: Type | None = None
+    message: str | None = None
+
 
 class JSONResponse(FastAPIJSONResponse, Generic[Type]):
-
     def __init__(
         self,
-        data: Optional[Type] = None,
-        message: Optional[str] = None,
-        status_code: int = 200
+        data: Type | None = None,
+        message: str | None = None,
+        status_code: int = 200,
     ):
         super().__init__(
-            content=Response(
-                data=jsonable_encoder(data),
-                message=message
-            ).model_dump(),
-            status_code=status_code
+            content=Response(data=jsonable_encoder(data), message=message).model_dump(),
+            status_code=status_code,
         )

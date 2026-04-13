@@ -8,15 +8,18 @@ from pymongo.errors import DuplicateKeyError
 from starlette.testclient import TestClient
 
 from app.endpoint.http_metadata_inventory import router
-from app.module.http_metadata_inventory_module import get_service
 from app.model.http_metadata_inventory_model import (
     FetchMetadataResponse,
     MetadataInventoryMixin,
     ScrapeMetadataResponse,
 )
+from app.module.http_metadata_inventory_module import get_service
 from app.service.http_metadata_inventory_service import HTTPMetadataInventoryService
 from app.utility.error_handling.exceptions import ServiceError
-from app.utility.error_handling.handlers import service_error_handler, unhandled_exception_handler
+from app.utility.error_handling.handlers import (
+    service_error_handler,
+    unhandled_exception_handler,
+)
 
 MOCK_METADATA = {
     "url": "https://example.com",
@@ -48,9 +51,10 @@ def client(mock_service):
 
 
 class TestScrapeEndpoint:
-
     def test_scrape_success(self, client, mock_service):
-        mock_service.scrape_metadata = AsyncMock(return_value=ScrapeMetadataResponse(**MOCK_METADATA))
+        mock_service.scrape_metadata = AsyncMock(
+            return_value=ScrapeMetadataResponse(**MOCK_METADATA)
+        )
         response = client.post(
             "/metadata_inventory/scrape",
             json={"url": "https://example.com"},
@@ -80,9 +84,7 @@ class TestScrapeEndpoint:
         assert "https://example.com" in response.json()["message"]
 
     def test_scrape_timeout_returns_502(self, client, mock_service):
-        mock_service.scrape_metadata = AsyncMock(
-            side_effect=httpx.TimeoutException("")
-        )
+        mock_service.scrape_metadata = AsyncMock(side_effect=httpx.TimeoutException(""))
         response = client.post(
             "/metadata_inventory/scrape",
             json={"url": "https://example.com"},
@@ -102,12 +104,13 @@ class TestScrapeEndpoint:
 
 
 class TestFetchEndpoint:
-
     def test_fetch_metadata_found_returns_200(self, client, mock_service):
-        mock_service.fetch_metadata = AsyncMock(return_value=FetchMetadataResponse(
-            metadata_available=True,
-            metadata=MetadataInventoryMixin(**MOCK_METADATA),
-        ))
+        mock_service.fetch_metadata = AsyncMock(
+            return_value=FetchMetadataResponse(
+                metadata_available=True,
+                metadata=MetadataInventoryMixin(**MOCK_METADATA),
+            )
+        )
         response = client.get(
             "/metadata_inventory/fetch",
             params={"url": "https://example.com"},
@@ -118,10 +121,12 @@ class TestFetchEndpoint:
         assert body["data"]["metadata"]["url"] == "https://example.com"
 
     def test_fetch_metadata_not_found_returns_202(self, client, mock_service):
-        mock_service.fetch_metadata = AsyncMock(return_value=FetchMetadataResponse(
-            metadata_available=False,
-            metadata=None,
-        ))
+        mock_service.fetch_metadata = AsyncMock(
+            return_value=FetchMetadataResponse(
+                metadata_available=False,
+                metadata=None,
+            )
+        )
         response = client.get(
             "/metadata_inventory/fetch",
             params={"url": "https://example.com"},
