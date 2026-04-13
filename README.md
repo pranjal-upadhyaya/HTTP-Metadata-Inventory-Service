@@ -49,6 +49,7 @@ poetry run python main.py
 | `DB_PASSWORD` | MongoDB password | `` |
 | `METADATA_INVENTORY_COLLECTION` | Collection name | `metadata_inventory` |
 | `HTTP_REQUEST_TIMEOUT_S` | Timeout for outbound HTTP requests (seconds) | `10` |
+| `ENV` | Environment name (`dev` enables hot reload) | `` |
 
 ---
 

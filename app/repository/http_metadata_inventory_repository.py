@@ -1,7 +1,6 @@
 from typing import Optional
 
 from beanie import PydanticObjectId
-from app.config import app_config
 
 from db.schema.http_metadata_inventory_schema import MetadataInventory
 

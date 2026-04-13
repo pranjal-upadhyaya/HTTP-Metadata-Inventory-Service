@@ -50,7 +50,7 @@ class HTTPMetadataInventoryService:
             logger.info("Existing metadata found for url: {}", request.url)
             return FetchMetadataResponse(
                 metadata_available=True,
-                metadata=  MetadataInventoryMixin.model_validate(
+                metadata=MetadataInventoryMixin.model_validate(
                     repository_response.model_dump()
                 )
             )
