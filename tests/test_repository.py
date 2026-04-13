@@ -29,7 +29,7 @@ async def initialized_db(mongo_container):
     await init_beanie(database=client["test_db"], document_models=[MetadataInventory])
     yield
     await MetadataInventory.find().delete()
-    client.close()
+    await client.close()
 
 
 @pytest.fixture
