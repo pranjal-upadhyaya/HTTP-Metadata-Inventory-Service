@@ -1,4 +1,4 @@
-import requests
+import httpx
 
 from fastapi import APIRouter, Depends
 from pymongo.errors import DuplicateKeyError
@@ -29,7 +29,7 @@ async def scrape_metadata(
 
     try:
         service_response: ScrapeMetadataResponse = await service.scrape_metadata(request=request)
-    except requests.exceptions.RequestException as e:
+    except httpx.RequestError as e:
         raise URLFetchError(url=str(request.url), reason=str(e))
     except DuplicateKeyError:
         raise DuplicateURLError(url=str(request.url))

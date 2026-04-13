@@ -1,5 +1,5 @@
 import asyncio
-import requests
+import httpx
 from app.model.http_metadata_inventory_model import (
     MetadataInventoryMixin,
     FetchMetadataRequest,
@@ -20,13 +20,14 @@ class HTTPMetadataInventoryService:
 
 
     async def scrape_metadata(self, request: ScrapeMetadataRequest) -> ScrapeMetadataResponse:
-        response = requests.get(url=request.url, timeout=app_config.http_request_timeout_s)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url=str(request.url), timeout=app_config.http_request_timeout_s)
 
         page_source = response.text
 
         headers = dict(response.headers)
 
-        cookies = response.cookies.get_dict()
+        cookies = dict(response.cookies)
 
         response = ScrapeMetadataResponse(
             url=request.url,
@@ -61,9 +62,9 @@ class HTTPMetadataInventoryService:
         async def _run_background_scrape() -> None:
             try:
                 await self.scrape_metadata(scrape_request)
-            except requests.exceptions.Timeout:
+            except httpx.TimeoutException:
                 logger.error("Background scrape timed out for url: {}", scrape_request.url)
-            except requests.exceptions.RequestException as e:
+            except httpx.RequestError as e:
                 logger.error("Background scrape failed for url {}: {}", scrape_request.url, str(e))
             except Exception as e:
                 logger.error("Unexpected error during background scrape for url {}: {}", scrape_request.url, str(e))

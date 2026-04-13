@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
-import requests as req_lib
 from fastapi import FastAPI
 from pymongo.errors import DuplicateKeyError
 from starlette.testclient import TestClient
@@ -70,7 +70,7 @@ class TestScrapeEndpoint:
 
     def test_scrape_url_fetch_error_returns_502(self, client, mock_service):
         mock_service.scrape_metadata = AsyncMock(
-            side_effect=req_lib.exceptions.ConnectionError("connection refused")
+            side_effect=httpx.ConnectError("connection refused")
         )
         response = client.post(
             "/metadata_inventory/scrape",
@@ -81,7 +81,7 @@ class TestScrapeEndpoint:
 
     def test_scrape_timeout_returns_502(self, client, mock_service):
         mock_service.scrape_metadata = AsyncMock(
-            side_effect=req_lib.exceptions.Timeout()
+            side_effect=httpx.TimeoutException("")
         )
         response = client.post(
             "/metadata_inventory/scrape",

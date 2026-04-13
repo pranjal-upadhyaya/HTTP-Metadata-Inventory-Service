@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
-import requests as req_lib
 
 from app.model.http_metadata_inventory_model import (
     FetchMetadataRequest,
@@ -27,17 +27,27 @@ def service():
         yield HTTPMetadataInventoryService()
 
 
+def _make_mock_http_response(text="<html></html>", headers=None, cookies=None):
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.text = text
+    mock_response.headers = headers or {"Content-Type": "text/html"}
+    mock_response.cookies = cookies or {}
+    return mock_response
+
+
 class TestScrapeMetadata:
 
     async def test_scrape_success(self, service):
-        mock_http_response = MagicMock()
-        mock_http_response.text = "<html></html>"
-        mock_http_response.headers = {"Content-Type": "text/html"}
-        mock_http_response.cookies.get_dict.return_value = {}
-
+        mock_response = _make_mock_http_response()
         service.repository.insert_metadata = AsyncMock(return_value="mock_id")
 
-        with patch("requests.get", return_value=mock_http_response):
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=mock_response)
+        mock_async_client = MagicMock()
+        mock_async_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_async_client.__aexit__ = AsyncMock(return_value=None)
+
+        with patch("httpx.AsyncClient", return_value=mock_async_client):
             result = await service.scrape_metadata(ScrapeMetadataRequest(url=MOCK_URL))
 
         assert isinstance(result, ScrapeMetadataResponse)
@@ -48,14 +58,20 @@ class TestScrapeMetadata:
         service.repository.insert_metadata.assert_called_once()
 
     async def test_scrape_stores_correct_payload(self, service):
-        mock_http_response = MagicMock()
-        mock_http_response.text = "<html>test</html>"
-        mock_http_response.headers = {"X-Custom": "value"}
-        mock_http_response.cookies.get_dict.return_value = {"session": "abc"}
-
+        mock_response = _make_mock_http_response(
+            text="<html>test</html>",
+            headers={"X-Custom": "value"},
+            cookies={"session": "abc"},
+        )
         service.repository.insert_metadata = AsyncMock(return_value="mock_id")
 
-        with patch("requests.get", return_value=mock_http_response):
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=mock_response)
+        mock_async_client = MagicMock()
+        mock_async_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_async_client.__aexit__ = AsyncMock(return_value=None)
+
+        with patch("httpx.AsyncClient", return_value=mock_async_client):
             await service.scrape_metadata(ScrapeMetadataRequest(url=MOCK_URL))
 
         call_arg = service.repository.insert_metadata.call_args[0][0]
@@ -65,13 +81,25 @@ class TestScrapeMetadata:
         assert call_arg["cookies"] == {"session": "abc"}
 
     async def test_scrape_timeout_propagates(self, service):
-        with patch("requests.get", side_effect=req_lib.exceptions.Timeout()):
-            with pytest.raises(req_lib.exceptions.Timeout):
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(side_effect=httpx.TimeoutException(""))
+        mock_async_client = MagicMock()
+        mock_async_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_async_client.__aexit__ = AsyncMock(return_value=None)
+
+        with patch("httpx.AsyncClient", return_value=mock_async_client):
+            with pytest.raises(httpx.TimeoutException):
                 await service.scrape_metadata(ScrapeMetadataRequest(url=MOCK_URL))
 
     async def test_scrape_connection_error_propagates(self, service):
-        with patch("requests.get", side_effect=req_lib.exceptions.ConnectionError()):
-            with pytest.raises(req_lib.exceptions.ConnectionError):
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(side_effect=httpx.ConnectError("connection refused"))
+        mock_async_client = MagicMock()
+        mock_async_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_async_client.__aexit__ = AsyncMock(return_value=None)
+
+        with patch("httpx.AsyncClient", return_value=mock_async_client):
+            with pytest.raises(httpx.ConnectError):
                 await service.scrape_metadata(ScrapeMetadataRequest(url=MOCK_URL))
 
 
@@ -118,7 +146,6 @@ class TestFetchMetadata:
 
         service.scrape_metadata = slow_scrape
 
-        # Should return immediately; slow_scrape is only scheduled, not awaited
         result = await service.fetch_metadata(FetchMetadataRequest(url=MOCK_URL))
         assert result.metadata_available is False
         assert not scrape_started
